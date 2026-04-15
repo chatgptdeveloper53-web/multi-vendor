@@ -4,6 +4,8 @@ use App\Http\Controllers\Front\HomeController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\AcheteurController;
 use App\Http\Controllers\Admin\VendeurController;
+use App\Http\Controllers\Admin\ProduitController;
+use App\Http\Controllers\Admin\CatalogueController;
 use App\Http\Controllers\Vendeur\OnboardingController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
@@ -97,6 +99,7 @@ Route::middleware(['auth', 'admin'])
         /*── Vendeurs & Onboarding ───────────────────────────────*/
         Route::prefix('vendeurs')->name('vendeurs.')->group(function () {
             Route::get('/',                [VendeurController::class, 'index'])->name('index');
+            Route::get('/pending',         fn() => redirect()->route('admin.vendeurs.index', ['statut' => 'EN_ATTENTE']))->name('pending');
             Route::get('/{id}',            [VendeurController::class, 'show'])->name('show');
             Route::get('/{id}/edit',       [VendeurController::class, 'edit'])->name('edit');
             Route::put('/{id}',            [VendeurController::class, 'update'])->name('update');
@@ -114,23 +117,27 @@ Route::middleware(['auth', 'admin'])
 
         /*── Produits ────────────────────────────────────────────*/
         Route::prefix('produits')->name('produits.')->group(function () {
-            Route::get('/',          fn() => abort(404))->name('index');
-            Route::get('/create',    fn() => abort(404))->name('create');
-            Route::get('/{id}',      fn($id) => abort(404))->name('show');
-            Route::get('/{id}/edit', fn($id) => abort(404))->name('edit');
-            Route::delete('/{id}',   fn($id) => abort(404))->name('destroy');
+            Route::get('/',            [ProduitController::class, 'index'])->name('index');
+            Route::get('/create',      [ProduitController::class, 'create'])->name('create');
+            Route::post('/',           [ProduitController::class, 'store'])->name('store');
+            Route::get('/{id}',        [ProduitController::class, 'show'])->name('show');
+            Route::get('/{id}/edit',   [ProduitController::class, 'edit'])->name('edit');
+            Route::put('/{id}',        [ProduitController::class, 'update'])->name('update');
+            Route::post('/{id}/toggle',[ProduitController::class, 'toggle'])->name('toggle');
+            Route::delete('/{id}',     [ProduitController::class, 'destroy'])->name('destroy');
         });
 
         /*── Catalogues ──────────────────────────────────────────*/
         Route::prefix('catalogues')->name('catalogues.')->group(function () {
-            Route::get('/',          fn() => abort(404))->name('index');
-            Route::get('/{id}',      fn($id) => abort(404))->name('show');
+            Route::get('/',            [CatalogueController::class, 'index'])->name('index');
+            Route::get('/{id}',        [CatalogueController::class, 'show'])->name('show');
+            Route::post('/{id}/toggle',[CatalogueController::class, 'toggle'])->name('toggle');
         });
 
         /*── Photos ──────────────────────────────────────────────*/
         Route::prefix('photos')->name('photos.')->group(function () {
-            Route::get('/',          fn() => abort(404))->name('index');
-            Route::delete('/{id}',   fn($id) => abort(404))->name('destroy');
+            Route::get('/',          fn() => redirect()->route('admin.produits.index'))->name('index');
+            Route::delete('/{id}',   [ProduitController::class, 'destroyPhoto'])->name('destroy');
         });
 
         /*── Commandes ───────────────────────────────────────────*/

@@ -11,7 +11,22 @@ class Catalogue extends Model
 {
     protected $fillable = [
         'vendeur_id',
+        'nom',
+        'description',
+        'actif',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'actif' => 'boolean',
+        ];
+    }
+
+    public function nomAffiche(): string
+    {
+        return $this->nom ?: 'Catalogue #' . $this->id;
+    }
 
     public function vendeur(): BelongsTo
     {

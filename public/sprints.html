@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Multi-Vendor PFE 2026 — Sprint Board</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:       #0f1117;
+      --surface:  #1a1d27;
+      --surface2: #22263a;
+      --border:   #2e3248;
+      --text:     #e2e8f0;
+      --muted:    #8892a4;
+      --accent:   #84b817;
+      --accent2:  #b5e02a;
+      --done:     #22c55e;
+      --progress: #f59e0b;
+      --git-yes:  #22c55e;
+      --git-no:   #475569;
+    }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: var(--bg); color: var(--text); min-height: 100vh;
+    }
+
+    /* ── HEADER ─────────────────────────────────────────────────── */
+    header {
+      background: linear-gradient(135deg, #1a1d27, #22263a);
+      border-bottom: 1px solid var(--border);
+      padding: 20px 32px; position: sticky; top: 0; z-index: 100;
+    }
+    .header-inner {
+      max-width: 1440px; margin: 0 auto;
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 16px;
+    }
+    .logo { display: flex; align-items: center; gap: 12px; }
+    .logo-icon {
+      width: 42px; height: 42px; border-radius: 11px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; font-weight: 800; color: #fff;
+    }
+    .logo-text h1 { font-size: 18px; font-weight: 700; }
+    .logo-text p  { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+    .stats-bar { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
+    .stat-item { text-align: center; }
+    .stat-item .val { font-size: 20px; font-weight: 700; color: var(--accent2); }
+    .stat-item .lbl { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; }
+
+    .overall-wrap { display: flex; align-items: center; gap: 10px; }
+    .overall-bar  { width: 130px; height: 7px; background: var(--border); border-radius: 99px; overflow: hidden; }
+    .overall-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); border-radius: 99px; transition: width .5s; }
+    .overall-pct  { font-size: 12px; font-weight: 700; color: var(--accent2); }
+
+    .git-stat {
+      display: flex; align-items: center; gap: 6px;
+      padding: 5px 12px; border-radius: 8px;
+      background: rgba(34,197,94,.08); border: 1px solid rgba(34,197,94,.2);
+    }
+    .git-stat .git-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--git-yes); }
+    .git-stat span { font-size: 11px; font-weight: 600; color: var(--git-yes); }
+
+    /* ── TOOLBAR ────────────────────────────────────────────────── */
+    .toolbar {
+      max-width: 1440px; margin: 20px auto 0; padding: 0 32px;
+      display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+    }
+    .filter-btn {
+      padding: 6px 14px; border-radius: 8px; border: 1px solid var(--border);
+      background: var(--surface); color: var(--muted);
+      font-size: 12px; cursor: pointer; transition: all .2s; white-space: nowrap;
+    }
+    .filter-btn:hover, .filter-btn.active {
+      border-color: var(--accent); color: var(--accent2); background: rgba(132,184,23,.12);
+    }
+    .filter-btn.git-filter.active {
+      border-color: var(--git-yes); color: var(--git-yes); background: rgba(34,197,94,.1);
+    }
+    .filter-sep { width: 1px; height: 20px; background: var(--border); margin: 0 4px; }
+
+    .search-wrap { position: relative; margin-left: auto; }
+    .search-wrap input {
+      background: var(--surface); border: 1px solid var(--border);
+      color: var(--text); border-radius: 8px; padding: 7px 14px 7px 34px;
+      font-size: 12px; outline: none; width: 210px; transition: border-color .2s;
+    }
+    .search-wrap input:focus { border-color: var(--accent); }
+    .search-ico { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 14px; }
+
+    /* ── BOARD ──────────────────────────────────────────────────── */
+    main {
+      max-width: 1440px; margin: 24px auto 60px; padding: 0 32px;
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 20px;
+    }
+
+    /* ── SPRINT CARD ────────────────────────────────────────────── */
+    .sprint-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 16px; overflow: hidden; transition: transform .2s, box-shadow .2s;
+    }
+    .sprint-card:hover { transform: translateY(-2px); box-shadow: 0 12px 40px rgba(0,0,0,.35); }
+
+    .sprint-header { padding: 16px 18px 12px; border-bottom: 1px solid var(--border); position: relative; }
+    .sprint-accent { position: absolute; top: 0; left: 0; right: 0; height: 3px; }
+
+    .sprint-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; margin-top: 6px; }
+    .sprint-num   { font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; opacity: .7; }
+    .sprint-title { font-size: 14px; font-weight: 700; margin-top: 3px; }
+    .sprint-desc  { font-size: 11px; color: var(--muted); margin-top: 3px; }
+
+    .sprint-badge {
+      font-size: 10px; font-weight: 700; padding: 3px 9px; border-radius: 99px;
+      white-space: nowrap; flex-shrink: 0; margin-top: 2px;
+    }
+
+    .sprint-progress { padding: 10px 18px; border-bottom: 1px solid var(--border); }
+    .prog-row   { display: flex; justify-content: space-between; margin-bottom: 5px; }
+    .prog-label { font-size: 11px; color: var(--muted); }
+    .prog-pct   { font-size: 11px; font-weight: 600; }
+    .prog-bar   { height: 5px; background: var(--surface2); border-radius: 99px; overflow: hidden; }
+    .prog-fill  { height: 100%; border-radius: 99px; transition: width .5s; }
+
+    .sprint-git-row {
+      padding: 8px 18px; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .sprint-git-row .label { font-size: 10px; color: var(--muted); display: flex; align-items: center; gap: 5px; }
+    .git-mini-bar { width: 100px; height: 4px; background: var(--surface2); border-radius: 99px; overflow: hidden; }
+    .git-mini-fill { height: 100%; background: var(--git-yes); border-radius: 99px; transition: width .5s; }
+    .git-mini-pct { font-size: 10px; font-weight: 700; color: var(--git-yes); }
+
+    .task-list { padding: 6px 10px 10px; }
+    .task-item {
+      display: flex; align-items: flex-start; gap: 8px;
+      padding: 8px 9px; border-radius: 9px; cursor: pointer;
+      transition: background .15s; border: 1px solid transparent; margin-bottom: 3px;
+    }
+    .task-item:hover { background: var(--surface2); border-color: var(--border); }
+    .task-item.done  { opacity: .5; }
+
+    .task-checkbox {
+      width: 17px; height: 17px; border-radius: 5px; border: 2px solid var(--border);
+      flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+      transition: all .2s; margin-top: 1px;
+    }
+    .task-item.done  .task-checkbox { background: var(--done);     border-color: var(--done); }
+    .task-item.doing .task-checkbox { background: var(--progress); border-color: var(--progress); }
+    .checkmark { display: none; color: #fff; font-size: 10px; font-weight: 700; }
+    .task-item.done  .checkmark { display: block; }
+    .dot { display: none; width: 5px; height: 5px; border-radius: 50%; background: #fff; }
+    .task-item.doing .dot { display: block; }
+
+    .task-body { flex: 1; min-width: 0; }
+    .task-meta { display: flex; align-items: center; gap: 6px; margin-bottom: 2px; }
+    .task-id   { font-size: 9px; color: var(--muted); font-weight: 700; letter-spacing: .5px; }
+
+    .git-badge {
+      display: inline-flex; align-items: center; gap: 3px;
+      font-size: 9px; font-weight: 700; letter-spacing: .3px;
+      padding: 2px 6px; border-radius: 4px; text-transform: uppercase;
+      cursor: default; flex-shrink: 0; transition: all .2s;
+      border: 1px solid;
+    }
+    .git-badge.integrated {
+      background: rgba(34,197,94,.12); color: var(--git-yes);
+      border-color: rgba(34,197,94,.3);
+    }
+    .git-badge.not-integrated {
+      background: rgba(71,85,105,.15); color: var(--git-no);
+      border-color: rgba(71,85,105,.25);
+    }
+    .git-badge svg { flex-shrink: 0; }
+
+    .task-text {
+      font-size: 12px; color: var(--text); line-height: 1.4; word-break: break-word;
+    }
+    .task-item.done .task-text { text-decoration: line-through; color: var(--muted); }
+
+    .task-status-btn {
+      flex-shrink: 0; font-size: 9px; font-weight: 700;
+      padding: 3px 7px; border-radius: 5px; border: none; cursor: pointer;
+      text-transform: uppercase; letter-spacing: .3px; transition: all .2s;
+    }
+    .task-item.todo  .task-status-btn { background: rgba(100,116,139,.18); color: var(--muted); }
+    .task-item.doing .task-status-btn { background: rgba(245,158,11,.18);  color: var(--progress); }
+    .task-item.done  .task-status-btn { background: rgba(34,197,94,.15);   color: var(--done); }
+
+    .completed-banner {
+      text-align: center; padding: 6px;
+      background: rgba(34,197,94,.07); border-top: 1px solid rgba(34,197,94,.15);
+      font-size: 11px; color: var(--done); font-weight: 600; display: none;
+    }
+    .sprint-card.all-done .completed-banner { display: block; }
+
+    @media (min-width: 1100px) { .sprint-full { grid-column: span 2; } }
+
+    .legend {
+      grid-column: 1/-1;
+      display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+      padding: 12px 16px; background: var(--surface);
+      border: 1px solid var(--border); border-radius: 12px;
+      font-size: 11px; color: var(--muted);
+    }
+    .legend-item { display: flex; align-items: center; gap: 6px; }
+
+    .done-section {
+      grid-column: 1/-1; background: var(--surface);
+      border: 1px solid var(--border); border-radius: 16px;
+      padding: 18px 22px; margin-top: 4px;
+    }
+    .done-section-header {
+      display: flex; align-items: center; gap: 10px; margin-bottom: 14px;
+    }
+    .done-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 7px;
+    }
+    .done-item {
+      display: flex; align-items: center; gap: 8px;
+      padding: 8px 10px;
+      background: rgba(34,197,94,.05); border: 1px solid rgba(34,197,94,.12);
+      border-radius: 8px;
+    }
+    .done-item .check { color: var(--done); font-size: 12px; flex-shrink: 0; }
+    .done-item .done-text { font-size: 11px; color: var(--muted); flex: 1; }
+    .done-item .git-badge { margin-left: auto; flex-shrink: 0; }
+
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+    @media (max-width: 600px) {
+      header, .toolbar { padding-left: 14px; padding-right: 14px; }
+      main { padding: 0 14px; }
+      .search-wrap input { width: 150px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── HEADER ─────────────────────────────────────────────────────── -->
+<header>
+  <div class="header-inner">
+    <div class="logo">
+      <div class="logo-icon">MV</div>
+      <div class="logo-text">
+        <h1>Multi-Vendor PFE 2026 — Sprint Board</h1>
+        <p>application/ (work) &nbsp;·&nbsp; multi-vendor/ &nbsp;·&nbsp; Laravel 12 + Broccoli + MatDash</p>
+      </div>
+    </div>
+    <div class="stats-bar">
+      <div class="stat-item"><div class="val" id="stat-total">0</div><div class="lbl">Total</div></div>
+      <div class="stat-item"><div class="val" id="stat-done" style="color:var(--done)">0</div><div class="lbl">Done</div></div>
+      <div class="stat-item"><div class="val" id="stat-doing" style="color:var(--progress)">0</div><div class="lbl">En cours</div></div>
+      <div class="stat-item"><div class="val" id="stat-todo" style="color:var(--muted)">0</div><div class="lbl">À faire</div></div>
+      <div class="overall-wrap">
+        <div class="overall-bar"><div class="overall-fill" id="overall-fill" style="width:0%"></div></div>
+        <div class="overall-pct" id="overall-pct">0%</div>
+      </div>
+      <div class="git-stat">
+        <div class="git-dot"></div>
+        <span id="git-stat-text">0 / 0 in repo</span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ── TOOLBAR ────────────────────────────────────────────────────── -->
+<div class="toolbar">
+  <button class="filter-btn active" data-filter="all">Tous</button>
+  <button class="filter-btn" data-filter="todo">À faire</button>
+  <button class="filter-btn" data-filter="doing">En cours</button>
+  <button class="filter-btn" data-filter="done">Terminés</button>
+  <div class="filter-sep"></div>
+  <button class="filter-btn git-filter" data-filter="git-yes">In Git Repo</button>
+  <button class="filter-btn git-filter" data-filter="git-no">Not in Repo</button>
+  <div class="search-wrap">
+    <span class="search-ico">&#128269;</span>
+    <input type="text" id="search" placeholder="Rechercher une tâche..." />
+  </div>
+</div>
+
+<!-- ── BOARD ──────────────────────────────────────────────────────── -->
+<main id="board"></main>
+
+<script>
+const GIT_ICON = `<svg width="9" height="9" viewBox="0 0 16 16" fill="currentColor">
+  <path d="M15.698 7.287 8.712.302a1.03 1.03 0 0 0-1.457 0l-1.45 1.45 1.84 1.84a1.223 1.223 0 0 1 1.55 1.56l1.773 1.774a1.224 1.224 0 0 1 1.267 2.025 1.226 1.226 0 0 1-2.002-1.335L8.437 5.42v4.553a1.226 1.226 0 1 1-1.003-.02V5.338a1.226 1.226 0 0 1-.647-1.61L4.96 1.883 .302 6.54a1.03 1.03 0 0 0 0 1.456l6.986 6.986a1.03 1.03 0 0 0 1.456 0l6.953-6.953a1.031 1.031 0 0 0 0-1.742z"/>
+</svg>`;
+
+// ── DATA ─────────────────────────────────────────────────────────────
+// git: true  = intégré dans le repo git (répertoire multi-vendor/)
+// git: false = seulement dans application/ local — PAS encore dans le repo
+const SPRINTS = [
+  {
+    id: 1, color: '#8b5cf6',
+    title: 'Espace Vendeur — Dashboard & Catalogue',
+    desc: 'Interface de gestion pour le vendeur connecté et validé',
+    tasks: [
+      { id: '2.1', text: 'Layout dashboard vendeur (sidebar, header, navigation)', git: false },
+      { id: '2.2', text: 'Dashboard vendeur : stats (produits, commandes, chiffre d\'affaires)', git: false },
+      { id: '2.3', text: 'Vendeur : gérer son catalogue (ajouter/modifier/supprimer produits)', git: false },
+      { id: '2.4', text: 'Vendeur : uploader des photos produits', git: false },
+      { id: '2.5', text: 'Vendeur : voir et gérer ses documents uploadés (re-soumettre si rejeté)', git: false },
+      { id: '2.6', text: 'Vendeur : modifier son profil (coordonnées, RIB, infos légales)', git: false },
+    ]
+  },
+  {
+    id: 2, color: '#ec4899',
+    title: 'Front-Office — Boutique & Panier',
+    desc: 'Navigation acheteur : catalogue, fiche produit, panier',
+    tasks: [
+      { id: '3.1', text: 'Page boutique (liste produits filtrée : catégorie, prix, vendeur)', git: false },
+      { id: '3.2', text: 'Fiche produit détaillée (photos, description, vendeur, stock)', git: false },
+      { id: '3.3', text: 'Ajout au panier (AJAX) + badge panier dans header', git: false },
+      { id: '3.4', text: 'Page panier (liste articles, quantités, sous-total, suppression)', git: false },
+      { id: '3.5', text: 'Mise à jour quantité panier (AJAX)', git: false },
+      { id: '3.6', text: 'Persistance panier (base de données via panier_produit pivot)', git: false },
+    ]
+  },
+  {
+    id: 3, color: '#10b981',
+    title: 'Commandes & Logistique',
+    desc: 'Tunnel d\'achat, suivi commandes et gestion logistique',
+    tasks: [
+      { id: '4.1', text: 'Page checkout (récapitulatif, adresse livraison, confirmation)', git: false },
+      { id: '4.2', text: 'Création commande (commande_produit pivot, statut EN_COURS)', git: false },
+      { id: '4.3', text: 'Acheteur : historique commandes + détail commande', git: false },
+      { id: '4.4', text: 'Vendeur : voir les commandes de ses produits', git: false },
+      { id: '4.5', text: 'Admin : gestion commandes (list, filtres statut, détail, changement statut)', git: false },
+      { id: '4.6', text: 'Calcul automatique frais de transport (matrice logistique)', git: false },
+      { id: '4.7', text: 'Annulation commande (acheteur / admin) + notification', git: false },
+    ]
+  },
+  {
+    id: 4, color: '#ef4444',
+    title: 'Notifications & Système',
+    desc: 'Alertes in-app et mails transactionnels',
+    tasks: [
+      { id: '5.1', text: 'Notification in-app : dossier validé / rejeté (vendeur)', git: false },
+      { id: '5.2', text: 'Notification in-app : nouvelle commande (vendeur)', git: false },
+      { id: '5.3', text: 'Notification in-app : commande expédiée (acheteur)', git: false },
+      { id: '5.4', text: 'Email transactionnel : bienvenue vendeur + récapitulatif dossier', git: false },
+      { id: '5.5', text: 'Admin : liste notifications avec marquage "lu"', git: false },
+      { id: '5.6', text: 'Badge notification non-lues dans sidebar admin', git: false },
+    ]
+  },
+  {
+    id: 5, color: '#f97316', full: true,
+    title: 'Finitions, Sécurité & Démo',
+    desc: 'Qualité, performance, seeders et préparation soutenance',
+    tasks: [
+      { id: '6.1', text: 'Policies Laravel (can:valider-vendeur, can:gérer-produit, etc.)', git: false },
+      { id: '6.2', text: 'Form Request classes pour toutes les validations critiques', git: false },
+      { id: '6.3', text: 'Seeders de démo (3 vendeurs, 20 produits, commandes variées)', git: false },
+      { id: '6.4', text: 'Optimisation N+1 (eager loading audit sur toutes les vues)', git: false },
+      { id: '6.5', text: 'Revue sécurité (XSS, CSRF, injection SQL, mass assignment)', git: false },
+      { id: '6.6', text: 'Responsive mobile : tester toutes les vues front + onboarding', git: false },
+      { id: '6.7', text: 'Documentation API VIES + fallback si service indisponible', git: false },
+    ]
+  }
+];
+
+// ── Tâches déjà réalisées (toutes sessions confondues) ───────────────
+// git: false = local seulement — aucune tâche n'est encore dans le repo
+const COMPLETED = [
+  // ── Infrastructure & Base ──
+  { id: 'c-migrations',   text: 'Migrations : 12 tables (users, vendeurs, documents, logistiques, catalogues, produits, photos, paniers, commandes, notifications, panier_produit, commande_produit)', git: false },
+  { id: 'c-mig-ext1',     text: '[Sprint 1] Migration : extension vendeurs — 16 champs (raison_sociale, SIRET, TVA, pays, tél., dirigeant, incoterms, MOQ, delai_traitement, matrice_fichier, etape_onboarding…)', git: false },
+  { id: 'c-mig-ext2',     text: '[Sprint 1] Migration : extension documents — 2 types enum (GARANTIE_CONSTRUCTEUR, RC_PRO) + nom_original + commentaire_admin', git: false },
+  { id: 'c-mig-ext3',     text: '[Sprint 1] Migration : extension logistiques — poids_min, tarif_par_kg, delai_jours, source (manual|import)', git: false },
+  { id: 'c-models',       text: 'Models Eloquent + relations (User, Vendeur, Acheteur, Administrateur, Document, Catalogue, Produit, Photo, Panier, Commande, Logistique, Notification)', git: false },
+  { id: 'c-enums',        text: 'Enums : StatutDossier, StatutCommande, TypeDocument (+ label(), icon(), isMultiUpload())', git: false },
+  { id: 'c-factories',    text: 'UserFactory corrigée (name → nom, role → acheteur par défaut)', git: false },
+  { id: 'c-seeders',      text: 'Seeders de base : admin@example.com, vendeur@example.com, acheteur@example.com (password: password)', git: false },
+  { id: 'c-storage-link', text: '[Sprint 1] storage:link créé — uploads visibles via public/storage/', git: false },
+  // ── Auth & Routing ──
+  { id: 'c-auth',         text: 'Auth Laravel Breeze (register, login, logout, reset password) + redirect role-based après login', git: false },
+  { id: 'c-reg-page',     text: 'Page inscription redesignée : sélecteur de rôle Acheteur / Vendeur (cards JS + hidden input + old() restore)', git: false },
+  { id: 'c-rbac',         text: 'AdminMiddleware + VendeurOnboardingMiddleware enregistrés comme alias dans bootstrap/app.php', git: false },
+  { id: 'c-routes',       text: 'Routes web.php : public, auth, vendeur/onboarding (17 routes), admin (prefix + name admin.)', git: false },
+  // ── Admin Panel ──
+  { id: 'c-adm-layout',   text: 'Admin layout MatDash (sidebar personnalisée, header, breadcrumb)', git: false },
+  { id: 'c-adm-sidebar',  text: 'Sidebar admin reconstruite sur les vrais models — badges live EN_ATTENTE, EN_COURS', git: false },
+  { id: 'c-adm-dash',     text: 'Dashboard admin : 6 stats cards + dernières commandes + derniers vendeurs en attente', git: false },
+  { id: 'c-adm-ach',      text: 'CRUD Acheteur complet (index, show, edit, update, destroy) — query via User::where(role, acheteur)', git: false },
+  { id: 'c-adm-vend',     text: '[Sprint ex-2] CRUD Vendeur admin (index, show, edit, update, valider, rejeter, destroy) — VendeurController + 3 vues', git: false },
+  // ── Onboarding Vendeur — Wizard ──
+  { id: 'c-vies',         text: 'ViesService : validation TVA intracommunautaire via API REST VIES CE — parsing CC+numéro, 27 pays UE, fallback gracieux', git: false },
+  { id: 'c-onb-ctrl',     text: 'OnboardingController : 5 × saveEtape, AJAX VIES, import CSV matrice transport, deleteDocument, pending, rejected — fixes : conditional required docs, redirect si profil complet, IBAN sanitize', git: false },
+  { id: 'c-onb-mw',       text: '[Sprint 1] VendeurOnboardingMiddleware : gate profil incomplet → wizard, profil complet EN_ATTENTE → pending, REJETE → rejected', git: false },
+  { id: 'c-onb-layout',   text: 'Layout onboarding responsive (stepper 5 étapes mobile + desktop, progress bar, save notice)', git: false },
+  { id: 'c-onb-e1',       text: 'Étape 1 : identité entreprise (SIRET auto-format, TVA VIES AJAX avec pré-remplissage raison sociale, forme juridique, pays, tél.)', git: false },
+  { id: 'c-onb-e2',       text: 'Étape 2 : représentant légal (nom dirigeant, fonction, email commercial optionnel)', git: false },
+  { id: 'c-onb-e3',       text: 'Étape 3 : documents & certifications (Kbis obligatoire, RC Pro obligatoire, CE × N, PPE2 × N, Garanties × N — drag&drop + delete AJAX)', git: false },
+  { id: 'c-onb-e4',       text: '[Sprint 1] Étape 4 : logistique lourde (incoterm cards DDP/EXW/DAP/FCA/Libre, matrice CSV import, saisie manuelle lignes tarifaires, MOQ, délai)', git: false },
+  { id: 'c-onb-e5',       text: '[Sprint 1] Étape 5 : RIB/IBAN (format auto, sanitize avant regex), 3 checkboxes consentement, bouton désactivé jusqu\'à tout coché, récap dossier', git: false },
+  { id: 'c-onb-pending',  text: '[Sprint 1] Page vendeur/pending : status animé, récap entreprise + documents checklist, timeline validation 4 étapes', git: false },
+  { id: 'c-onb-rejected', text: '[Sprint 1] Page vendeur/rejected : motifs par document (commentaire_admin), guide correction 3 étapes, état de chaque doc', git: false },
+  // ── Sprint 2 : Catalogue & Produits Admin ──
+  { id: 'c-mig-cat1',     text: '[Sprint 2] Migration : produits — champs actif, reference, poids_kg, dimensions, categorie', git: false },
+  { id: 'c-mig-cat2',     text: '[Sprint 2] Migration : photos — champs ordre, principale (photo de couverture)', git: false },
+  { id: 'c-mig-cat3',     text: '[Sprint 2] Migration : catalogues — champs nom, description, actif', git: false },
+  { id: 'c-cat-ctrl',     text: '[Sprint 2] CatalogueController admin (index avec stats, show avec liste produits, toggle actif)', git: false },
+  { id: 'c-prod-ctrl',    text: '[Sprint 2] ProduitController admin (CRUD complet : index, show, create, store, edit, update, destroy, toggle, destroyPhoto AJAX)', git: false },
+  { id: 'c-prod-photos',  text: '[Sprint 2] Upload multi-photos produit (drag&drop, preview immédiat, photo principale auto, suppression AJAX par photo)', git: false },
+  { id: 'c-prod-index',   text: '[Sprint 2] Vue admin/produits/index : stats 4 cards, filtres catalogue/statut/catégorie/search, toggle actif inline, miniatures', git: false },
+  { id: 'c-prod-show',    text: '[Sprint 2] Vue admin/produits/show : galerie photos avec switcher, infos logistique (poids/dimensions), lien vendeur/catalogue', git: false },
+  { id: 'c-prod-create',  text: '[Sprint 2] Vue admin/produits/create : form complet (catalogue select, catégorie datalist, prix/stock, poids/dimensions, drag&drop photos)', git: false },
+  { id: 'c-prod-edit',    text: '[Sprint 2] Vue admin/produits/edit : édition + gestion photos existantes (suppression AJAX) + ajout nouvelles photos', git: false },
+  { id: 'c-cat-index',    text: '[Sprint 2] Vue admin/catalogues/index : stats 3 cards, filtres, toggle actif inline, lien vers vendeur', git: false },
+  { id: 'c-cat-show',     text: '[Sprint 2] Vue admin/catalogues/show : info vendeur + logistique associée + liste produits filtrée + bouton "Ajouter produit"', git: false },
+  { id: 'c-routes-cat',   text: '[Sprint 2] Routes admin : produits (8 routes), catalogues (3 routes), photos (2 routes), vendeurs.pending (redirect)', git: false },
+  // ── Front ──
+  { id: 'c-front-home',   text: 'Homepage Broccoli (hero, stats, featured produits) intégrée', git: false },
+];
+
+// ── STORAGE ──────────────────────────────────────────────────────────
+// v4 : bump après sprint 2 (Catalogue & Produits Admin) complet
+const SK = 'mv_pfe_2026_v4';
+let state = {};
+
+function loadState() {
+  try { state = JSON.parse(localStorage.getItem(SK)) || {}; } catch { state = {}; }
+  const allTasks = [...SPRINTS.flatMap(s => s.tasks), ...COMPLETED];
+  allTasks.forEach(t => {
+    if (!state[t.id]) state[t.id] = { status: COMPLETED.find(c => c.id === t.id) ? 'done' : 'todo' };
+  });
+}
+
+function saveState() { localStorage.setItem(SK, JSON.stringify(state)); }
+
+const CYCLE = { todo: 'doing', doing: 'done', done: 'todo' };
+const LABEL  = { todo: 'À faire', doing: 'En cours', done: 'Terminé' };
+
+function cycleStatus(id) {
+  const cur = state[id]?.status || 'todo';
+  state[id] = { ...state[id], status: CYCLE[cur] };
+  saveState(); render();
+}
+
+function computeStats() {
+  let total = 0, done = 0, doing = 0, todo = 0, gitYes = 0;
+  SPRINTS.forEach(s => s.tasks.forEach(t => {
+    total++;
+    const st = state[t.id]?.status || 'todo';
+    if (st === 'done') done++; else if (st === 'doing') doing++; else todo++;
+    if (t.git) gitYes++;
+  }));
+  return { total, done, doing, todo, gitYes, pct: total ? Math.round(done / total * 100) : 0 };
+}
+
+let activeFilter = 'all';
+let searchQuery  = '';
+
+function gitBadge(isGit) {
+  return isGit
+    ? `<span class="git-badge integrated">${GIT_ICON} In repo</span>`
+    : `<span class="git-badge not-integrated">${GIT_ICON} Not in repo</span>`;
+}
+
+function render() {
+  const stats = computeStats();
+  document.getElementById('stat-total').textContent  = stats.total;
+  document.getElementById('stat-done').textContent   = stats.done;
+  document.getElementById('stat-doing').textContent  = stats.doing;
+  document.getElementById('stat-todo').textContent   = stats.todo;
+  document.getElementById('overall-fill').style.width = stats.pct + '%';
+  document.getElementById('overall-pct').textContent  = stats.pct + '%';
+  document.getElementById('git-stat-text').textContent = `${stats.gitYes} / ${stats.total} in repo`;
+
+  const board = document.getElementById('board');
+  board.innerHTML = '';
+
+  // Legend
+  const legend = document.createElement('div');
+  legend.className = 'legend';
+  legend.innerHTML = `
+    <strong style="color:var(--text);font-size:11px;">Légende :</strong>
+    <div class="legend-item"><span style="color:var(--done)">&#10003;</span> Terminé</div>
+    <div class="legend-item"><span style="width:8px;height:8px;border-radius:50%;background:var(--progress);display:inline-block"></span> En cours</div>
+    <div class="legend-item"><span style="width:8px;height:8px;border-radius:50%;background:var(--border);display:inline-block"></span> À faire</div>
+    <div class="filter-sep" style="height:14px;width:1px;background:var(--border)"></div>
+    <div class="legend-item">${gitBadge(true)} = Intégré dans le repo git</div>
+    <div class="legend-item">${gitBadge(false)} = Seulement en local</div>
+    <div style="margin-left:auto;font-size:10px;color:var(--muted)">Cliquer sur une tâche pour changer son statut</div>
+  `;
+  board.appendChild(legend);
+
+  let visibleCards = 0;
+
+  SPRINTS.forEach(sprint => {
+    const filteredTasks = sprint.tasks.filter(t => {
+      if (searchQuery && !t.text.toLowerCase().includes(searchQuery) && !t.id.includes(searchQuery)) return false;
+      const st = state[t.id]?.status || 'todo';
+      if (activeFilter === 'todo')    return st === 'todo';
+      if (activeFilter === 'doing')   return st === 'doing';
+      if (activeFilter === 'done')    return st === 'done';
+      if (activeFilter === 'git-yes') return t.git === true;
+      if (activeFilter === 'git-no')  return t.git === false;
+      return true;
+    });
+
+    if (filteredTasks.length === 0 && activeFilter !== 'all') return;
+    if (searchQuery && filteredTasks.length === 0) return;
+    visibleCards++;
+
+    const tasksToShow = activeFilter === 'all' && !searchQuery ? sprint.tasks : filteredTasks;
+    const sprintDone  = sprint.tasks.filter(t => (state[t.id]?.status || 'todo') === 'done').length;
+    const sprintPct   = sprint.tasks.length ? Math.round(sprintDone / sprint.tasks.length * 100) : 0;
+    const gitDone     = sprint.tasks.filter(t => t.git).length;
+    const gitPct      = sprint.tasks.length ? Math.round(gitDone / sprint.tasks.length * 100) : 0;
+    const allDone     = sprint.tasks.every(t => (state[t.id]?.status || 'todo') === 'done');
+
+    const card = document.createElement('div');
+    card.className = `sprint-card${sprint.full ? ' sprint-full' : ''}${allDone ? ' all-done' : ''}`;
+
+    const badgeBg = sprintPct === 100 ? 'rgba(34,197,94,.15)'
+                  : sprintPct > 0    ? 'rgba(245,158,11,.15)' : 'rgba(100,116,139,.15)';
+    const badgeColor = sprintPct === 100 ? 'var(--done)'
+                     : sprintPct > 0    ? 'var(--progress)' : 'var(--muted)';
+
+    card.innerHTML = `
+      <div class="sprint-header">
+        <div class="sprint-accent" style="background:${sprint.color}"></div>
+        <div class="sprint-top">
+          <div>
+            <div class="sprint-num" style="color:${sprint.color}">Sprint ${sprint.id}</div>
+            <div class="sprint-title">${sprint.title}</div>
+            <div class="sprint-desc">${sprint.desc}</div>
+          </div>
+          <div class="sprint-badge" style="background:${badgeBg};color:${badgeColor}">
+            ${sprintDone}/${sprint.tasks.length}
+          </div>
+        </div>
+      </div>
+      <div class="sprint-progress">
+        <div class="prog-row">
+          <span class="prog-label">Progression</span>
+          <span class="prog-pct" style="color:${sprint.color}">${sprintPct}%</span>
+        </div>
+        <div class="prog-bar">
+          <div class="prog-fill" style="width:${sprintPct}%;background:${sprint.color}"></div>
+        </div>
+      </div>
+      <div class="sprint-git-row">
+        <div class="label">${GIT_ICON} Intégré dans repo</div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div class="git-mini-bar"><div class="git-mini-fill" style="width:${gitPct}%"></div></div>
+          <div class="git-mini-pct">${gitDone}/${sprint.tasks.length}</div>
+        </div>
+      </div>
+      <div class="task-list">
+        ${tasksToShow.map(t => {
+          const st = state[t.id]?.status || 'todo';
+          return `
+          <div class="task-item ${st}" onclick="cycleStatus('${t.id}')">
+            <div class="task-checkbox">
+              <span class="checkmark">&#10003;</span>
+              <span class="dot"></span>
+            </div>
+            <div class="task-body">
+              <div class="task-meta">
+                <span class="task-id">#${t.id}</span>
+                ${gitBadge(t.git)}
+              </div>
+              <div class="task-text">${t.text}</div>
+            </div>
+            <button class="task-status-btn" onclick="event.stopPropagation();cycleStatus('${t.id}')">
+              ${LABEL[st]}
+            </button>
+          </div>`;
+        }).join('')}
+      </div>
+      <div class="completed-banner">✅ Sprint terminé !</div>
+    `;
+    board.appendChild(card);
+  });
+
+  if (visibleCards === 0) {
+    const empty = document.createElement('div');
+    empty.style.cssText = 'grid-column:1/-1;text-align:center;color:var(--muted);padding:60px 0;font-size:14px;';
+    empty.textContent = 'Aucune tâche trouvée pour ce filtre.';
+    board.appendChild(empty);
+  }
+
+  // ── ALREADY COMPLETED SECTION ──
+  if (activeFilter === 'all' || activeFilter === 'done') {
+    const completedFiltered = COMPLETED.filter(t => {
+      if (searchQuery) return t.text.toLowerCase().includes(searchQuery) || t.id.includes(searchQuery);
+      if (activeFilter === 'git-yes') return t.git === true;
+      if (activeFilter === 'git-no')  return t.git === false;
+      return true;
+    });
+
+    if (completedFiltered.length > 0) {
+      const section = document.createElement('div');
+      section.className = 'done-section';
+      section.innerHTML = `
+        <div class="done-section-header">
+          <span style="font-size:16px;">✅</span>
+          <div>
+            <div style="font-size:14px;font-weight:700;color:var(--done)">
+              Déjà réalisé — avant les sprints (${completedFiltered.length} éléments)
+            </div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px;">
+              Travail accompli lors des sessions précédentes — migrations, models, auth, admin CRUD, onboarding wizard (étapes 1–3), VIES, VendeurController
+            </div>
+          </div>
+        </div>
+        <div class="done-grid">
+          ${completedFiltered.map(t => `
+            <div class="done-item">
+              <span class="check">&#10003;</span>
+              <span class="done-text">${t.text}</span>
+              ${gitBadge(t.git)}
+            </div>
+          `).join('')}
+        </div>
+      `;
+      board.appendChild(section);
+    }
+  }
+}
+
+// ── EVENTS ────────────────────────────────────────────────────────────
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    activeFilter = btn.dataset.filter;
+    render();
+  });
+});
+
+document.getElementById('search').addEventListener('input', e => {
+  searchQuery = e.target.value.toLowerCase().trim();
+  render();
+});
+
+loadState();
+render();
+</script>
+</body>
+</html>
