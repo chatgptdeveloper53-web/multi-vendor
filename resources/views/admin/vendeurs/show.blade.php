@@ -90,18 +90,37 @@
                                 @endif
                             </span>
                         </div>
-                        @if($vendeur->coordonnees)
-                            <div class="d-flex align-items-start gap-2 mb-2">
-                                <iconify-icon icon="solar:map-point-line-duotone" class="text-muted mt-1"></iconify-icon>
-                                <span class="text-muted fs-2">Coordonnées</span>
-                                <span class="ms-auto fw-semibold text-end" style="max-width:160px;">{{ $vendeur->coordonnees }}</span>
+                        @if($vendeur->raison_sociale)
+                            <div class="d-flex align-items-center gap-2 mb-2">
+                                <iconify-icon icon="solar:buildings-line-duotone" class="text-muted"></iconify-icon>
+                                <span class="text-muted fs-2">Entreprise</span>
+                                <span class="ms-auto fw-semibold">{{ $vendeur->raison_sociale }}</span>
                             </div>
                         @endif
-                        @if($vendeur->rib)
+                        @if($vendeur->numero_tva)
                             <div class="d-flex align-items-center gap-2 mb-2">
-                                <iconify-icon icon="solar:card-line-duotone" class="text-muted"></iconify-icon>
-                                <span class="text-muted fs-2">RIB</span>
-                                <span class="ms-auto fw-semibold">{{ $vendeur->rib }}</span>
+                                <iconify-icon icon="solar:shield-check-line-duotone" class="text-muted"></iconify-icon>
+                                <span class="text-muted fs-2">TVA</span>
+                                <span class="ms-auto fw-semibold">
+                                    {{ $vendeur->numero_tva }}
+                                    @if($vendeur->tva_verifiee)
+                                        <span class="badge bg-success-subtle text-success ms-1" style="font-size:.65rem;">VIES ✓</span>
+                                    @endif
+                                </span>
+                            </div>
+                        @endif
+                        @if($vendeur->siret)
+                            <div class="d-flex align-items-center gap-2 mb-2">
+                                <iconify-icon icon="solar:id-card-line-duotone" class="text-muted"></iconify-icon>
+                                <span class="text-muted fs-2">SIRET</span>
+                                <span class="ms-auto fw-semibold">{{ $vendeur->siret }}</span>
+                            </div>
+                        @endif
+                        @if($vendeur->nom_dirigeant)
+                            <div class="d-flex align-items-center gap-2 mb-2">
+                                <iconify-icon icon="solar:user-id-line-duotone" class="text-muted"></iconify-icon>
+                                <span class="text-muted fs-2">Dirigeant</span>
+                                <span class="ms-auto fw-semibold">{{ $vendeur->nom_dirigeant }}</span>
                             </div>
                         @endif
                     </div>
@@ -190,6 +209,100 @@
         ══════════════════════════════════════════════ --}}
         <div class="col-lg-8">
 
+            {{-- Company Information --}}
+            <div class="card border-0 shadow-none mb-4">
+                <div class="card-body">
+                    <h6 class="fw-semibold mb-3">
+                        <iconify-icon icon="solar:buildings-2-line-duotone" class="me-2 text-primary"></iconify-icon>
+                        Informations de l'entreprise
+                    </h6>
+                    <div class="row g-3">
+                        @if($vendeur->forme_juridique)
+                            <div class="col-md-6">
+                                <label class="text-muted fs-2">Forme juridique</label>
+                                <p class="fw-semibold mb-0">{{ $vendeur->forme_juridique }}</p>
+                            </div>
+                        @endif
+                        @if($vendeur->pays)
+                            <div class="col-md-6">
+                                <label class="text-muted fs-2">Pays</label>
+                                <p class="fw-semibold mb-0">{{ $vendeur->pays }}</p>
+                            </div>
+                        @endif
+                        @if($vendeur->telephone)
+                            <div class="col-md-6">
+                                <label class="text-muted fs-2">Téléphone</label>
+                                <p class="fw-semibold mb-0">{{ $vendeur->telephone }}</p>
+                            </div>
+                        @endif
+                        @if($vendeur->site_web)
+                            <div class="col-md-6">
+                                <label class="text-muted fs-2">Site web</label>
+                                <p class="fw-semibold mb-0">
+                                    <a href="{{ $vendeur->site_web }}" target="_blank" class="text-primary text-decoration-none">
+                                        {{ $vendeur->site_web }}
+                                    </a>
+                                </p>
+                            </div>
+                        @endif
+                        @if($vendeur->adresse_siege)
+                            <div class="col-12">
+                                <label class="text-muted fs-2">Adresse du siège social</label>
+                                <p class="fw-semibold mb-0">{{ $vendeur->adresse_siege }}</p>
+                            </div>
+                        @endif
+                    </div>
+                </div>
+            </div>
+
+            {{-- Logistics Information --}}
+            <div class="card border-0 shadow-none mb-4">
+                <div class="card-body">
+                    <h6 class="fw-semibold mb-3">
+                        <iconify-icon icon="solar:map-2-line-duotone" class="me-2 text-success"></iconify-icon>
+                        Informations logistiques
+                    </h6>
+                    <div class="row g-3">
+                        @if($vendeur->adresse_expedition)
+                            <div class="col-12">
+                                <label class="text-muted fs-2">Adresse d'expédition</label>
+                                <p class="fw-semibold mb-0">{{ $vendeur->adresse_expedition }}</p>
+                            </div>
+                        @endif
+                        @if($vendeur->poids_max_palette)
+                            <div class="col-md-6">
+                                <label class="text-muted fs-2">Poids max par palette</label>
+                                <p class="fw-semibold mb-0">{{ $vendeur->poids_max_palette }} kg</p>
+                            </div>
+                        @endif
+                        @if($vendeur->incoterm_preference)
+                            <div class="col-md-6">
+                                <label class="text-muted fs-2">Incoterm préféré</label>
+                                <p class="fw-semibold mb-0">{{ $vendeur->incoterm_preference }}</p>
+                            </div>
+                        @endif
+                        @if($vendeur->moq)
+                            <div class="col-md-6">
+                                <label class="text-muted fs-2">Minimum de commande (MOQ)</label>
+                                <p class="fw-semibold mb-0">{{ $vendeur->moq }} unité(s)</p>
+                            </div>
+                        @endif
+                        @if($vendeur->delai_traitement_jours)
+                            <div class="col-md-6">
+                                <label class="text-muted fs-2">Délai de traitement</label>
+                                <p class="fw-semibold mb-0">{{ $vendeur->delai_traitement_jours }} jour(s)</p>
+                            </div>
+                        @endif
+                        @if($vendeur->politique_retour)
+                            <div class="col-12">
+                                <label class="text-muted fs-2">Politique de retour</label>
+                                <p class="fw-semibold mb-0" style="white-space:pre-wrap;">{{ $vendeur->politique_retour }}</p>
+                            </div>
+                        @endif
+                    </div>
+                </div>
+            </div>
+
             {{-- Documents --}}
             <div class="card border-0 shadow-none mb-4">
                 <div class="card-body">
@@ -214,15 +327,33 @@
                                 </thead>
                                 <tbody>
                                     @foreach($vendeur->documents as $doc)
+                                        @php
+                                            // Get the proper label from the type enum
+                                            if ($doc->type instanceof \App\Enums\TypeDocument) {
+                                                $typeLabel = $doc->type->label();
+                                            } else {
+                                                try {
+                                                    $typeEnum = \App\Enums\TypeDocument::from($doc->type);
+                                                    $typeLabel = $typeEnum->label();
+                                                } catch (\Exception $e) {
+                                                    $typeLabel = $doc->type ?? '—';
+                                                }
+                                            }
+                                        @endphp
                                         <tr>
-                                            <td class="fw-semibold">{{ $doc->type_document ?? '—' }}</td>
+                                            <td class="fw-semibold">
+                                                <small class="badge bg-light text-dark">{{ $typeLabel }}</small>
+                                                @if($doc->categorie)
+                                                    <small class="text-muted d-block mt-1">{{ $doc->categorie }}</small>
+                                                @endif
+                                            </td>
                                             <td>
                                                 @if($doc->fichier)
                                                     <a href="{{ asset('storage/' . $doc->fichier) }}"
                                                        target="_blank"
                                                        class="text-primary text-decoration-none">
                                                         <iconify-icon icon="solar:file-download-line-duotone" class="me-1"></iconify-icon>
-                                                        Télécharger
+                                                        {{ $doc->nom_original ?? 'Télécharger' }}
                                                     </a>
                                                 @else
                                                     <span class="text-muted">—</span>
@@ -230,7 +361,7 @@
                                             </td>
                                             <td>
                                                 @php
-                                                    $docStatut = $doc->statut ?? 'EN_ATTENTE';
+                                                    $docStatut = $doc->valide ? 'VALIDE' : 'EN_ATTENTE';
                                                     [$dBg, $dLabel] = match($docStatut) {
                                                         'EN_ATTENTE' => ['bg-warning-subtle text-warning', 'En attente'],
                                                         'VALIDE'     => ['bg-success-subtle text-success', 'Validé'],

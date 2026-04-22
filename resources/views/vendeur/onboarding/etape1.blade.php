@@ -1,20 +1,20 @@
 @extends('vendeur.onboarding.layout')
 @php $etapeNum = 1; @endphp
-@section('title', 'Étape 1 — Identité de l\'entreprise')
+@section('title', 'Étape 1 — Informations de l\'entreprise')
 
 @section('content')
 <div class="row justify-content-center">
-<div class="col-lg-7 col-xl-6">
+<div class="col-lg-8 col-xl-7">
 
     <div class="mb-4">
-        <h4 class="fw-bold mb-1">🏢 Identité de l'entreprise</h4>
-        <p class="text-muted mb-0">Ces informations permettent de vérifier votre existence légale et sont transmises à notre équipe de conformité.</p>
+        <h4 class="fw-bold mb-1">🏢 Informations de votre entreprise</h4>
+        <p class="text-muted mb-0">Veuillez fournir les détails juridiques et de contact de votre entreprise ainsi que les informations de votre représentant légal.</p>
     </div>
 
     <form method="POST" action="{{ route('vendeur.onboarding.save1') }}" id="form-etape1">
         @csrf
 
-        {{-- ── Informations légales ── --}}
+        {{-- ── Section 1 : Identification légale ── --}}
         <div class="ob-card mb-4">
             <div class="ob-section-title">
                 <iconify-icon icon="solar:buildings-line-duotone" class="me-1"></iconify-icon>
@@ -70,10 +70,9 @@
                 @error('siret') <div class="invalid-feedback">{{ $message }}</div> @enderror
                 <small class="text-muted">France uniquement. Pour les entreprises hors France, laissez votre équivalent national.</small>
             </div>
-
         </div>
 
-        {{-- ── TVA Intracommunautaire + VIES ── --}}
+        {{-- ── Section 2 : TVA Intracommunautaire ── --}}
         <div class="ob-card mb-4">
             <div class="ob-section-title">
                 <iconify-icon icon="solar:shield-check-line-duotone" class="me-1"></iconify-icon>
@@ -118,7 +117,25 @@
             </div>
         </div>
 
-        {{-- ── Contact ── --}}
+        {{-- ── Section 3 : Adresse du siège social ── --}}
+        <div class="ob-card mb-4">
+            <div class="ob-section-title">
+                <iconify-icon icon="solar:map-point-line-duotone" class="me-1"></iconify-icon>
+                Adresse du siège social
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Adresse complète <span class="text-danger">*</span></label>
+                <input type="text" name="adresse_siege"
+                       class="form-control @error('adresse_siege') is-invalid @enderror"
+                       value="{{ old('adresse_siege', $vendeur->adresse_siege) }}"
+                       placeholder="Ex : 123 rue de la Paix, 75000 Paris"
+                       maxlength="500" required>
+                @error('adresse_siege') <div class="invalid-feedback">{{ $message }}</div> @enderror
+            </div>
+        </div>
+
+        {{-- ── Section 4 : Contact & présence web ── --}}
         <div class="ob-card mb-4">
             <div class="ob-section-title">
                 <iconify-icon icon="solar:phone-line-duotone" class="me-1"></iconify-icon>
@@ -141,6 +158,42 @@
                            value="{{ old('site_web', $vendeur->site_web) }}"
                            placeholder="https://www.votreentreprise.fr">
                     @error('site_web') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                </div>
+            </div>
+        </div>
+
+        {{-- ── Section 5 : Représentant légal ── --}}
+        <div class="ob-card mb-4">
+            <div class="ob-section-title">
+                <iconify-icon icon="solar:user-id-line-duotone" class="me-1"></iconify-icon>
+                Représentant légal
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Nom complet <span class="text-danger">*</span></label>
+                <input type="text" name="nom_dirigeant"
+                       class="form-control @error('nom_dirigeant') is-invalid @enderror"
+                       value="{{ old('nom_dirigeant', $vendeur->nom_dirigeant) }}"
+                       placeholder="Jean Dupont" required>
+                @error('nom_dirigeant') <div class="invalid-feedback">{{ $message }}</div> @enderror
+            </div>
+
+            <div class="row g-3 mb-3">
+                <div class="col-sm-6">
+                    <label class="form-label fw-semibold">Fonction <span class="text-danger">*</span></label>
+                    <input type="text" name="fonction_dirigeant"
+                           class="form-control @error('fonction_dirigeant') is-invalid @enderror"
+                           value="{{ old('fonction_dirigeant', $vendeur->fonction_dirigeant) }}"
+                           placeholder="PDG, Directeur, etc." required>
+                    @error('fonction_dirigeant') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                </div>
+                <div class="col-sm-6">
+                    <label class="form-label fw-semibold">Email commercial <small class="text-muted fw-normal">(optionnel)</small></label>
+                    <input type="email" name="email_commercial"
+                           class="form-control @error('email_commercial') is-invalid @enderror"
+                           value="{{ old('email_commercial', $vendeur->email_commercial) }}"
+                           placeholder="contact@entreprise.fr">
+                    @error('email_commercial') <div class="invalid-feedback">{{ $message }}</div> @enderror
                 </div>
             </div>
         </div>
@@ -196,7 +249,6 @@ async function verifierVies() {
             icon.setAttribute('icon', 'solar:verified-check-line-duotone');
             text.textContent = '✅ TVA valide — ' + (data.name ?? '');
             if (data.address) detail.textContent = '📍 ' + data.address;
-            // Pré-remplir raison sociale si vide
             const rs = document.querySelector('[name=raison_sociale]');
             if (data.name && !rs.value) rs.value = data.name;
         } else {
@@ -212,11 +264,10 @@ async function verifierVies() {
     }
 }
 
-// Format automatique SIRET (groupes de 3-3-3-5 au besoin)
 document.getElementById('input-siret').addEventListener('input', function() {
     this.value = this.value.replace(/\D/g, '').slice(0, 14);
 });
-// TVA uppercase auto
+
 document.getElementById('input-tva').addEventListener('input', function() {
     const pos = this.selectionStart;
     this.value = this.value.toUpperCase().replace(/\s/g, '');

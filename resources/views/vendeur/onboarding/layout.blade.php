@@ -156,11 +156,12 @@
     @php
         $etapeActuelle = $etapeNum ?? 1;
         $etapes = [
-            1 => 'Entreprise',
-            2 => 'Dirigeant',
-            3 => 'Documents',
+            0 => 'Compte',
+            1 => 'Société',
+            2 => 'Documents',
+            3 => 'Certifications',
             4 => 'Logistique',
-            5 => 'Finalisation',
+            5 => 'Confirmation',
         ];
     @endphp
     <div class="bg-white border-bottom">
@@ -168,11 +169,13 @@
             <div class="stepper">
                 @foreach($etapes as $num => $label)
                     @php
-                        $cls = $num < $etapeActuelle ? 'done' : ($num === $etapeActuelle ? 'active' : '');
+                        // Étape 0 (Compte) est toujours done
+                        // Les autres étapes : done si < etapeActuelle, active si === etapeActuelle
+                        $cls = ($num === 0 || $num < $etapeActuelle) ? 'done' : ($num === $etapeActuelle ? 'active' : '');
                     @endphp
                     <div class="step {{ $cls }}">
                         <div class="step-circle">
-                            @if($num < $etapeActuelle)
+                            @if($num === 0 || $num < $etapeActuelle)
                                 <iconify-icon icon="solar:check-circle-bold" style="font-size:1.1rem;"></iconify-icon>
                             @else
                                 {{ $num }}
@@ -184,7 +187,7 @@
             </div>
             {{-- Progress bar mobile --}}
             <div class="ob-progress">
-                <div class="ob-progress-bar" style="width: {{ round((($etapeActuelle - 1) / 4) * 100) }}%"></div>
+                <div class="ob-progress-bar" style="width: {{ round((($etapeActuelle - 1) / 5) * 100) }}%"></div>
             </div>
         </div>
     </div>

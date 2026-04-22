@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 class Vendeur extends Model
 {
     protected $fillable = [
-        // Identité entreprise
+        // Identité entreprise (étape 1)
         'user_id',
         'raison_sociale',
         'forme_juridique',
@@ -21,24 +21,27 @@ class Vendeur extends Model
         'pays',
         'site_web',
         'telephone',
+        'adresse_siege',
 
-        // Représentant légal
+        // Représentant légal (étape 1 – fusionné)
         'nom_dirigeant',
         'fonction_dirigeant',
         'email_commercial',
 
-        // Coordonnées / légal (legacy + extended)
+        // Coordonnées / légal (legacy)
         'coordonnees',
         'rib',
         'informations_legales',
 
-        // Logistique
+        // Logistique (étape 4)
         'incoterm_preference',
         'incoterm_notes',
         'moq',
         'delai_traitement_jours',
         'politique_retour',
         'matrice_transport_fichier',
+        'adresse_expedition',
+        'poids_max_palette',
 
         // Statut
         'statut_onboarding',
@@ -55,6 +58,7 @@ class Vendeur extends Model
             'etape_onboarding'       => 'integer',
             'moq'                    => 'integer',
             'delai_traitement_jours' => 'integer',
+            'poids_max_palette'      => 'float',
         ];
     }
 
@@ -82,26 +86,17 @@ class Vendeur extends Model
 
     // ─── Helpers ──────────────────────────────────────────────────
 
-    /**
-     * Retourne l'URL de reprise de l'onboarding selon l'étape courante.
-     */
     public function onboardingUrl(): string
     {
         $etape = min($this->etape_onboarding ?? 1, 5);
         return route('vendeur.onboarding.etape', $etape);
     }
 
-    /**
-     * Pourcentage de progression du wizard.
-     */
     public function onboardingProgress(): int
     {
         return (int) round((($this->etape_onboarding - 1) / 5) * 100);
     }
 
-    /**
-     * Onboarding terminé si toutes les 5 étapes sont passées.
-     */
     public function onboardingComplet(): bool
     {
         return $this->etape_onboarding > 5 || $this->profil_complet;
